@@ -229,6 +229,35 @@
             justify-content: center;
         }
 
+        /* NEUE Bild-Card */
+        .image-card {
+            grid-column: span 2;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border-top: 6px solid #9b59b6;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+
+        .image-card img {
+            max-width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .image-card.hidden {
+            display: none;
+        }
+
         /* Antwort-Cards Grid */
         .answers-grid {
             display: grid;
@@ -495,7 +524,8 @@
                 grid-template-columns: 1fr;
             }
             
-            .question-card {
+            .question-card,
+            .image-card {
                 grid-column: span 1;
             }
         }
@@ -525,6 +555,17 @@
             .question-card {
                 padding: 1.5rem;
                 font-size: 1.2rem;
+                min-height: 120px;
+            }
+            
+            .image-card {
+                padding: 1rem;
+                min-height: 150px;
+                max-height: 300px;
+            }
+            
+            .image-card img {
+                max-height: 250px;
             }
             
             .answer-card {
@@ -578,7 +619,17 @@
             
             .question-card {
                 font-size: 1.1rem;
+                min-height: 100px;
+                padding: 1rem;
+            }
+            
+            .image-card {
                 min-height: 120px;
+                max-height: 250px;
+            }
+            
+            .image-card img {
+                max-height: 200px;
             }
             
             .score {
@@ -653,6 +704,11 @@
                 Die Frage wird geladen...
             </div>
 
+            <!-- NEUE Bild-Card -->
+            <div class="image-card hidden" id="image-card">
+                <!-- Bild wird hier dynamisch eingefügt -->
+            </div>
+
             <div class="answers-grid" id="answers-container">
                 <!-- Antwort-Cards werden hier dynamisch eingefügt -->
             </div>
@@ -702,6 +758,7 @@
 
         // DOM-Elemente
         const questionCard = document.getElementById('question-card');
+        const imageCard = document.getElementById('image-card');
         const answersContainer = document.getElementById('answers-container');
         const resultContainer = document.getElementById('result-container');
         const statusText = document.getElementById('status-text');
@@ -716,17 +773,20 @@
             {
                 question: "Was ist richtig geschrieben?",
                 answers: ["Schuler", "Schüler", "Schüller", "Schuller"],
-                correctAnswerIndex: 1
+                correctAnswerIndex: 1,
+                imageNumber: "0000"
             },
             {
                 question: "Was ist richtig geschrieben?",
                 answers: ["Wise", "Wisse", "Wiesse", "Wiese"],
-                correctAnswerIndex: 3
+                correctAnswerIndex: 3,
+                imageNumber: "0000"
             },
             {
                 question: "Welches Wort ist ein Nomen?",
                 answers: ["laufen", "schön", "Haus", "schnell"],
-                correctAnswerIndex: 2
+                correctAnswerIndex: 2,
+                imageNumber: "0000"
             }
         ];
 
@@ -772,7 +832,7 @@
             xhr.send();
         }
 
-        // Text in Fragen parsen - VEREINFACHT ohne #
+        // Text in Fragen parsen - MIT BILDFUNKTION
         function parseQuestionsFromText(text) {
             // Teile den Text in Zeilen und filtere leere Zeilen
             const lines = text.split('\n')
@@ -790,18 +850,24 @@
                 // Frage ist der erste Teil
                 const question = parts[0].trim();
                 
+                // Letzter Teil ist die Bildnummer (4-stellig)
+                const imageNumber = parts[parts.length - 1].trim();
+                
+                // Antworten sind alle Teile dazwischen (sollten 4 sein)
+                const answerParts = parts.slice(1, parts.length - 1);
+                
                 // Antworten extrahieren und korrekte Antwort finden
                 const answers = [];
                 let correctAnswerIndex = -1;
                 
-                for (let i = 1; i < parts.length; i++) {
-                    let answer = parts[i].trim();
+                for (let i = 0; i < answerParts.length; i++) {
+                    let answer = answerParts[i].trim();
                     
                     // Prüfe, ob dies die korrekte Antwort ist (endet mit *)
                     if (answer.endsWith('*')) {
                         // Entferne das * und trimme
                         answer = answer.slice(0, -1).trim();
-                        correctAnswerIndex = i - 1;
+                        correctAnswerIndex = i;
                     }
                     
                     answers.push(answer);
@@ -811,7 +877,8 @@
                 console.log(`Frage ${index + 1}:`, {
                     question: question,
                     answers: answers,
-                    correctAnswerIndex: correctAnswerIndex
+                    correctAnswerIndex: correctAnswerIndex,
+                    imageNumber: imageNumber
                 });
                 
                 // Validierung
@@ -825,10 +892,16 @@
                     correctAnswerIndex = 0;
                 }
                 
+                // Prüfe Bildnummer-Format
+                if (!/^\d{4}$/.test(imageNumber)) {
+                    console.warn(`Zeile ${index + 1} hat keine gültige 4-stellige Bildnummer: "${imageNumber}"`);
+                }
+                
                 return {
                     question,
                     answers,
-                    correctAnswerIndex
+                    correctAnswerIndex,
+                    imageNumber
                 };
             });
             
@@ -852,7 +925,7 @@
             showQuestion();
         }
 
-        // Frage anzeigen
+        // Frage anzeigen MIT BILD
         function showQuestion() {
             isAnswerSelected = false;
             answersContainer.innerHTML = '';
@@ -874,8 +947,19 @@
                 }
             }
             
+            // Frage anzeigen
             questionCard.textContent = questionData.question;
             
+            // Bild anzeigen oder ausblenden
+            if (questionData.imageNumber && questionData.imageNumber !== "0000") {
+                imageCard.classList.remove('hidden');
+                imageCard.innerHTML = `<img src="${questionData.imageNumber}.jpg" alt="Illustration zur Frage" onerror="this.style.display='none'">`;
+            } else {
+                imageCard.classList.add('hidden');
+                imageCard.innerHTML = '';
+            }
+            
+            // Status aktualisieren
             let roundText = '';
             if (currentRound === 1) {
                 roundText = 'Erste Runde';
@@ -887,6 +971,7 @@
             
             statusText.textContent = `Frage ${currentQuestionIndex + 1} von ${currentQuestions.length} (${roundText})`;
             
+            // Antworten erstellen
             questionData.answers.forEach((answer, index) => {
                 const answerCard = document.createElement('div');
                 answerCard.className = `answer-card ${cardColors[index % cardColors.length]} ${cardBackgrounds[index % cardBackgrounds.length]} no-overlay`;
@@ -924,7 +1009,7 @@
                 score++;
             } else {
                 answerCards[selectedIndex].classList.add('wrong');
-                answerCards[questionData.correctAnswerIndex].classList.add('correct');
+                answerCards[questionData.correctAnswerIndex].classlist.add('correct');
                 wrongQuestions.push(questionData);
             }
             
@@ -970,6 +1055,7 @@
             resultMessage.textContent = `${score} von ${totalQuestions} Fragen richtig beantwortet. ${repeatInfo}${message}`;
             
             document.querySelector('.question-card').style.display = 'none';
+            imageCard.style.display = 'none';
             answersContainer.style.display = 'none';
             document.querySelector('.quiz-status').style.display = 'none';
             resultContainer.style.display = 'block';
@@ -983,6 +1069,7 @@
             currentRound = 1;
             
             document.querySelector('.question-card').style.display = 'block';
+            imageCard.style.display = 'block';
             answersContainer.style.display = 'grid';
             document.querySelector('.quiz-status').style.display = 'block';
             resultContainer.style.display = 'none';
