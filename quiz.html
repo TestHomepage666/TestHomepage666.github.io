@@ -635,6 +635,19 @@
         </nav>
     </header>
 
+   <!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Astrid-Lindgren-Schule Duisburg</title>
+    <style>
+        /* [Alle CSS-Stile bleiben gleich wie vorher] */
+    </style>
+</head>
+<body>
+    <!-- [Header bleibt gleich] -->
+    
     <main>
         <section class="intro">
             <h1>Quiz</h1>
@@ -667,24 +680,7 @@
         </div>
     </main>
 
-    <footer>
-        <div class="footer-left">
-            <p>&copy;2025 Astrid-Lindgren-Schule Duisburg</p>
-        </div>
-        
-        <div class="footer-contact">
-            <div class="contact-item">
-                <img src="icon3.png" alt="Telefon" class="contact-icon">
-                <span>0203 - 332667</span>
-            </div>
-            <div class="contact-item">
-                <img src="icon4.png" alt="E-Mail" class="contact-icon">
-                <span>GGS.AstridLindgrenSchule@stadt-duisburg.de</span>
-            </div>
-        </div>
-        
-        <img src="logo2.png" alt="Astrid-Lindgren-Schule Duisburg" class="footer-logo">
-    </footer>
+    <!-- [Footer bleibt gleich] -->
 
     <script>
         // Quiz-Daten
@@ -694,7 +690,7 @@
         let score = 0;
         let totalQuestions = 0;
         let isAnswerSelected = false;
-        let currentRound = 1; // Neue Variable für die Rundenzählung
+        let currentRound = 1;
 
         // Farben für die Karten
         const cardColors = ['color-green', 'color-yellow', 'color-orange', 'color-red'];
@@ -711,7 +707,7 @@
         const resultMessage = document.getElementById('result-message');
         const restartButton = document.getElementById('restart-button');
 
-        // Fallback-Fragen (werden verwendet, wenn Test.txt nicht geladen werden kann)
+        // Fallback-Fragen
         const fallbackQuestions = [
             {
                 question: "Was ist richtig geschrieben?",
@@ -732,7 +728,6 @@
 
         // Fragen laden
         function loadQuestions() {
-            // Versuche zuerst, die Fragen aus der Datei zu laden
             loadQuestionsFromFile();
         }
 
@@ -740,14 +735,12 @@
         function loadQuestionsFromFile() {
             const xhr = new XMLHttpRequest();
             
-            // Zufällige Zahl anhängen, um Caching zu verhindern (nur für Debugging)
             const url = 'Test.txt?' + new Date().getTime();
             
             xhr.open('GET', url, true);
             
             xhr.onload = function() {
                 if (xhr.status === 200 || xhr.status === 0) {
-                    // Status 0 kann bei lokalen Dateien auftreten
                     try {
                         parseQuestionsFromText(xhr.responseText);
                         console.log('Fragen erfolgreich aus Datei geladen');
@@ -766,7 +759,6 @@
                 useFallbackQuestions();
             };
             
-            // Timeout nach 3 Sekunden
             xhr.timeout = 3000;
             xhr.ontimeout = function() {
                 console.warn('Timeout beim Laden, verwende Fallback-Fragen');
@@ -776,13 +768,21 @@
             xhr.send();
         }
 
-        // Text in Fragen parsen
+        // Text in Fragen parsen - KORRIGIERTE VERSION
         function parseQuestionsFromText(text) {
             const lines = text.split('\n').filter(line => line.trim() !== '');
             
             questions = lines.map(line => {
-                // Entferne das "#" am Ende
-                const cleanLine = line.replace(/#$/, '').trim();
+                // Zuerst das # am Ende entfernen (falls vorhanden)
+                let cleanLine = line.trim();
+                
+                // Entferne # und alles danach bis zum Zeilenende
+                // Berücksichtigt auch Fälle wo # in der Antwort vorkommen könnte
+                const hashIndex = cleanLine.indexOf('#');
+                if (hashIndex !== -1) {
+                    cleanLine = cleanLine.substring(0, hashIndex).trim();
+                }
+                
                 const parts = cleanLine.split(' - ');
                 
                 // Frage ist der erste Teil
@@ -801,7 +801,20 @@
                         correctAnswerIndex = i - 1;
                     }
                     
+                    // Stelle sicher, dass keine #-Zeichen mehr enthalten sind
+                    answer = answer.replace(/#/g, '').trim();
+                    
                     answers.push(answer);
+                }
+                
+                // Validierung
+                if (answers.length !== 4) {
+                    console.warn(`Frage hat nicht genau 4 Antworten: "${question}"`);
+                }
+                
+                if (correctAnswerIndex === -1) {
+                    console.warn(`Keine korrekte Antwort für Frage: "${question}"`);
+                    correctAnswerIndex = 0; // Fallback
                 }
                 
                 return {
@@ -840,17 +853,14 @@
             const questionData = currentQuestions[currentQuestionIndex];
             
             if (!questionData) {
-                // Wenn keine Frage mehr da ist, prüfen ob falsche Fragen wiederholt werden müssen
                 if (wrongQuestions.length > 0) {
-                    // Falsche Fragen wiederholen
                     questions = [...wrongQuestions];
                     wrongQuestions = [];
                     currentQuestionIndex = 0;
-                    currentRound++; // Runde erhöhen
+                    currentRound++;
                     showQuestion();
                     return;
                 } else {
-                    // Quiz beendet
                     showResults();
                     return;
                 }
@@ -859,7 +869,7 @@
             // Frage anzeigen
             questionCard.textContent = questionData.question;
             
-            // Status aktualisieren - jetzt mit korrekter Rundenzählung
+            // Status aktualisieren
             let roundText = '';
             if (currentRound === 1) {
                 roundText = 'Erste Runde';
@@ -882,7 +892,6 @@
                 
                 answerCard.appendChild(content);
                 
-                // Event-Listener für Klick
                 answerCard.addEventListener('click', () => selectAnswer(index));
                 
                 answersContainer.appendChild(answerCard);
@@ -900,36 +909,30 @@
             
             const answerCards = document.querySelectorAll('.answer-card');
             
-            // Alle Antwort-Cards deaktivieren
             answerCards.forEach(card => {
                 card.classList.add('disabled');
                 card.style.cursor = 'not-allowed';
             });
             
-            // Ausgewählte Antwort markieren
             if (selectedIndex === questionData.correctAnswerIndex) {
                 answerCards[selectedIndex].classList.add('correct');
                 score++;
             } else {
                 answerCards[selectedIndex].classList.add('wrong');
                 answerCards[questionData.correctAnswerIndex].classList.add('correct');
-                
-                // Zur Wiederholungsliste hinzufügen
                 wrongQuestions.push(questionData);
             }
             
-            // Nächste Frage nach kurzer Pause
             setTimeout(() => {
                 currentQuestionIndex++;
                 
                 if (currentQuestionIndex < questions.length) {
                     showQuestion();
                 } else if (wrongQuestions.length > 0) {
-                    // Zu Wiederholungsfragen wechseln
                     currentQuestionIndex = 0;
                     questions = [...wrongQuestions];
                     wrongQuestions = [];
-                    currentRound++; // Runde erhöhen
+                    currentRound++;
                     showQuestion();
                 } else {
                     showResults();
@@ -954,7 +957,6 @@
             else if (percentage >= 50) message = 'Gut gemacht! Übung macht den Meister.';
             else message = 'Weiter so! Jede Übung bringt Sie weiter.';
             
-            // Zusätzliche Info über die Wiederholungen
             let repeatInfo = '';
             if (currentRound > 1) {
                 repeatInfo = `Sie haben ${currentRound - 1} Wiederholungsrunde(n) gebraucht. `;
@@ -962,7 +964,6 @@
             
             resultMessage.textContent = `${score} von ${totalQuestions} Fragen richtig beantwortet. ${repeatInfo}${message}`;
             
-            // Quiz verstecken, Ergebnisse anzeigen
             document.querySelector('.question-card').style.display = 'none';
             answersContainer.style.display = 'none';
             document.querySelector('.quiz-status').style.display = 'none';
@@ -971,19 +972,16 @@
 
         // Quiz neustarten
         function restartQuiz() {
-            // Reset aller Variablen
             currentQuestionIndex = 0;
             wrongQuestions = [];
             score = 0;
             currentRound = 1;
             
-            // UI zurücksetzen
             document.querySelector('.question-card').style.display = 'block';
             answersContainer.style.display = 'grid';
             document.querySelector('.quiz-status').style.display = 'block';
             resultContainer.style.display = 'none';
             
-            // Quiz neu laden
             loadQuestions();
         }
 
