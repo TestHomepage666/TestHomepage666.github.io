@@ -229,7 +229,7 @@
             justify-content: center;
         }
 
-        /* GEÄNDERT: Bild-Card ohne farbige Kante - nur weiß mit dezenter Schattierung */
+        /* Bild-Card ohne farbige Kante */
         .image-card {
             grid-column: span 2;
             background: white;
@@ -265,7 +265,7 @@
             gap: 2rem;
         }
 
-        /* Antwort-Card Stile (basierend auf UnsereSchule.html) */
+        /* Antwort-Card Stile */
         .answer-card {
             background: white;
             border-radius: 8px;
@@ -285,7 +285,7 @@
             font-size: 1.2rem;
         }
 
-        /* Hintergrundbilder für Antwort-Cards (optional) */
+        /* Hintergrundbilder für Antwort-Cards */
         .answer-card.with-bg::before {
             content: '';
             position: absolute;
@@ -435,7 +435,6 @@
             margin: 2rem 0;
         }
 
-        /* VERÄNDERT: Mehr Abstand zum Neustart-Button */
         #result-message {
             margin-bottom: 3rem;
             font-size: 1.2rem;
@@ -454,7 +453,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-top: 2rem; /* Mehr Abstand über dem Button */
+            margin-top: 2rem;
         }
 
         .restart-button:hover {
@@ -625,11 +624,11 @@
             
             .image-card {
                 min-height: 120px;
-                max-height: 500px;
+                max-height: 250px;
             }
             
             .image-card img {
-                max-height: 500px;
+                max-height: 200px;
             }
             
             .score {
@@ -704,7 +703,6 @@
                 Die Frage wird geladen...
             </div>
 
-            <!-- NEUE Bild-Card -->
             <div class="image-card hidden" id="image-card">
                 <!-- Bild wird hier dynamisch eingefügt -->
             </div>
@@ -744,13 +742,16 @@
 
     <script>
         // Quiz-Daten
-        let questions = [];
+        let mainQuestions = []; // Fragen aus Test.txt (max. 9)
+        let additionalQuestions = []; // Fragen aus Zusatzdateien (1.txt, 2.txt, etc.)
+        let allQuestions = []; // Alle Fragen (Hauptfragen + Zusatzfragen)
         let currentQuestionIndex = 0;
-        let wrongQuestions = [];
+        let wrongQuestions = []; // Falsch beantwortete Fragen
         let score = 0;
         let totalQuestions = 0;
         let isAnswerSelected = false;
         let currentRound = 1;
+        let loadedAdditionalFiles = new Set(); // Bereits geladene Zusatzdateien
 
         // Farben für die Karten
         const cardColors = ['color-green', 'color-yellow', 'color-orange', 'color-red'];
@@ -774,31 +775,65 @@
                 question: "Was ist richtig geschrieben?",
                 answers: ["Schuler", "Schüler", "Schüller", "Schuller"],
                 correctAnswerIndex: 1,
-                imageNumber: "0000"
+                imageNumber: "0000",
+                source: "main",
+                originalIndex: 0
             },
             {
                 question: "Was ist richtig geschrieben?",
                 answers: ["Wise", "Wisse", "Wiesse", "Wiese"],
                 correctAnswerIndex: 3,
-                imageNumber: "0000"
+                imageNumber: "0000",
+                source: "main",
+                originalIndex: 1
             },
             {
                 question: "Welches Wort ist ein Nomen?",
                 answers: ["laufen", "schön", "Haus", "schnell"],
                 correctAnswerIndex: 2,
-                imageNumber: "0000"
+                imageNumber: "0000",
+                source: "main",
+                originalIndex: 2
             }
         ];
 
-        // Fragen laden
-        function loadQuestions() {
-            loadQuestionsFromFile();
+        // Funktion zum Mischen eines Arrays (Fisher-Yates Algorithmus)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
         }
 
-        // Versucht, Fragen aus Test.txt zu laden
-        function loadQuestionsFromFile() {
-            const xhr = new XMLHttpRequest();
+        // Funktion zum Mischen der Antworten einer Frage
+        function shuffleQuestionAnswers(question) {
+            // Erstelle ein Array mit den Antworten und ihren originalen Indizes
+            const answersWithIndex = question.answers.map((answer, index) => ({ answer, index }));
             
+            // Mische dieses Array
+            const shuffledAnswersWithIndex = shuffleArray(answersWithIndex);
+            
+            // Extrahiere die gemischten Antworten
+            const shuffledAnswers = shuffledAnswersWithIndex.map(item => item.answer);
+            
+            // Finde den neuen Index der korrekten Antwort
+            const correctAnswerWithIndex = shuffledAnswersWithIndex.find(item => item.index === question.correctAnswerIndex);
+            const shuffledCorrectIndex = shuffledAnswersWithIndex.indexOf(correctAnswerWithIndex);
+            
+            // Erstelle eine neue Frage mit gemischten Antworten
+            return {
+                ...question,
+                answers: shuffledAnswers,
+                correctAnswerIndex: shuffledCorrectIndex,
+                isShuffled: true
+            };
+        }
+
+        // Hauptfragen laden
+        function loadMainQuestions() {
+            const xhr = new XMLHttpRequest();
             const url = 'Test.txt?' + new Date().getTime();
             
             xhr.open('GET', url, true);
@@ -806,10 +841,10 @@
             xhr.onload = function() {
                 if (xhr.status === 200 || xhr.status === 0) {
                     try {
-                        parseQuestionsFromText(xhr.responseText);
-                        console.log('Fragen erfolgreich aus Datei geladen');
+                        parseMainQuestionsFromText(xhr.responseText);
+                        console.log('Hauptfragen erfolgreich geladen');
                     } catch (error) {
-                        console.error('Fehler beim Parsen der Fragen:', error);
+                        console.error('Fehler beim Parsen der Hauptfragen:', error);
                         useFallbackQuestions();
                     }
                 } else {
@@ -832,54 +867,83 @@
             xhr.send();
         }
 
-        // Text in Fragen parsen - KORRIGIERTE VERSION
-        function parseQuestionsFromText(text) {
-            // Teile den Text in Zeilen und filtere leere Zeilen
+        // Zusatzfragen für eine bestimmte Frage laden
+        function loadAdditionalQuestions(questionNumber) {
+            // Verhindere doppeltes Laden derselben Datei
+            if (loadedAdditionalFiles.has(questionNumber)) {
+                console.log(`Zusatzfragen für Frage ${questionNumber} bereits geladen`);
+                return;
+            }
+            
+            const xhr = new XMLHttpRequest();
+            const url = `${questionNumber}.txt?` + new Date().getTime();
+            
+            xhr.open('GET', url, true);
+            
+            xhr.onload = function() {
+                if (xhr.status === 200 || xhr.status === 0) {
+                    try {
+                        const questions = parseAdditionalQuestionsFromText(xhr.responseText, questionNumber);
+                        additionalQuestions.push(...questions);
+                        loadedAdditionalFiles.add(questionNumber);
+                        console.log(`Zusatzfragen aus ${questionNumber}.txt geladen:`, questions.length);
+                    } catch (error) {
+                        console.error(`Fehler beim Parsen der Zusatzfragen aus ${questionNumber}.txt:`, error);
+                    }
+                } else {
+                    console.warn(`Datei ${questionNumber}.txt konnte nicht geladen werden`);
+                }
+            };
+            
+            xhr.onerror = function() {
+                console.warn(`Netzwerkfehler beim Laden von ${questionNumber}.txt`);
+            };
+            
+            xhr.timeout = 2000;
+            xhr.ontimeout = function() {
+                console.warn(`Timeout beim Laden von ${questionNumber}.txt`);
+            };
+            
+            xhr.send();
+        }
+
+        // Hauptfragen aus Text parsen
+        function parseMainQuestionsFromText(text) {
             const lines = text.split('\n')
                 .map(line => line.trim())
                 .filter(line => line !== '');
             
-            console.log('Gefundene Zeilen:', lines);
+            console.log('Gefundene Hauptfragen:', lines.length);
             
-            questions = lines.map((line, index) => {
-                console.log(`Verarbeite Zeile ${index + 1}: "${line}"`);
+            mainQuestions = lines.map((line, index) => {
+                if (index >= 9) {
+                    console.warn(`Maximal 9 Hauptfragen erlaubt, überspringe Frage ${index + 1}`);
+                    return null;
+                }
                 
-                // Teile die Zeile an den Bindestrichen (mit Leerzeichen)
                 const parts = line.split(' - ');
                 
-                // Die letzten 5 Teile sollten sein: 4 Antworten + 1 Bildnummer
-                // Also: parts[0] = Frage, parts[1-4] = Antworten, parts[5] = Bildnummer
-                // Wir müssen also prüfen, ob der letzte Teil eine 4-stellige Zahl ist
-                
                 let imageNumber = "0000";
-                let actualParts = [...parts]; // Kopie der Parts
+                let actualParts = [...parts];
                 
-                // Prüfe, ob der letzte Teil eine 4-stellige Zahl ist
                 const lastPart = parts[parts.length - 1];
                 if (/^\d{4}$/.test(lastPart)) {
                     imageNumber = lastPart;
-                    // Entferne die Bildnummer aus den Parts
                     actualParts = parts.slice(0, parts.length - 1);
                 }
                 
-                // Jetzt sollten wir 5 Teile haben: Frage + 4 Antworten
                 if (actualParts.length !== 5) {
-                    console.warn(`Zeile ${index + 1} hat ${actualParts.length} Teile, aber 5 erwartet (Frage + 4 Antworten): "${line}"`);
+                    console.warn(`Zeile ${index + 1} hat ${actualParts.length} Teile, aber 5 erwartet: "${line}"`);
                 }
                 
-                // Frage ist der erste Teil
                 const question = actualParts[0].trim();
-                
-                // Antworten extrahieren und korrekte Antwort finden
                 const answers = [];
                 let correctAnswerIndex = -1;
                 
                 for (let i = 1; i < actualParts.length; i++) {
                     let answer = actualParts[i].trim();
                     
-                    // Prüfe, ob dies die korrekte Antwort ist (endet mit *)
                     if (answer.endsWith('*')) {
-                        // Entferne das * und trimme
                         answer = answer.slice(0, -1).trim();
                         correctAnswerIndex = i - 1;
                     }
@@ -887,24 +951,12 @@
                     answers.push(answer);
                 }
                 
-                // Debug-Ausgabe
-                console.log(`Frage ${index + 1}:`, {
-                    question: question,
-                    answers: answers,
-                    correctAnswerIndex: correctAnswerIndex,
-                    imageNumber: imageNumber,
-                    partsCount: parts.length,
-                    actualPartsCount: actualParts.length
-                });
-                
-                // Validierung
                 if (answers.length !== 4) {
                     console.warn(`Zeile ${index + 1} hat ${answers.length} statt 4 Antworten: "${line}"`);
                 }
                 
                 if (correctAnswerIndex === -1) {
-                    console.warn(`Zeile ${index + 1} hat keine korrekte Antwort (mit * markiert): "${line}"`);
-                    // Setze die erste Antwort als korrekt, falls keine markiert ist
+                    console.warn(`Zeile ${index + 1} hat keine korrekte Antwort: "${line}"`);
                     correctAnswerIndex = 0;
                 }
                 
@@ -912,44 +964,128 @@
                     question,
                     answers,
                     correctAnswerIndex,
-                    imageNumber
+                    imageNumber,
+                    source: "main",
+                    originalIndex: index,
+                    questionNumber: index + 1
                 };
-            });
+            }).filter(question => question !== null);
             
-            if (questions.length === 0) {
-                throw new Error('Keine gültigen Fragen gefunden');
+            if (mainQuestions.length === 0) {
+                throw new Error('Keine gültigen Hauptfragen gefunden');
             }
             
-            totalQuestions = questions.length;
+            // Lade Zusatzfragen für alle Hauptfragen im Voraus
+            mainQuestions.forEach(question => {
+                loadAdditionalQuestions(question.questionNumber);
+            });
+            
+            // Initialisiere allQuestions mit Hauptfragen
+            allQuestions = [...mainQuestions];
+            totalQuestions = allQuestions.length;
             totalQuestionsSpan.textContent = totalQuestions;
             updateProgress();
             showQuestion();
+        }
+
+        // Zusatzfragen aus Text parsen
+        function parseAdditionalQuestionsFromText(text, questionNumber) {
+            const lines = text.split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '');
+            
+            return lines.map((line, index) => {
+                const parts = line.split(' - ');
+                
+                let imageNumber = "0000";
+                let actualParts = [...parts];
+                
+                const lastPart = parts[parts.length - 1];
+                if (/^\d{4}$/.test(lastPart)) {
+                    imageNumber = lastPart;
+                    actualParts = parts.slice(0, parts.length - 1);
+                }
+                
+                if (actualParts.length !== 5) {
+                    console.warn(`Zusatzfrage ${index + 1} hat ${actualParts.length} Teile: "${line}"`);
+                }
+                
+                const question = actualParts[0].trim();
+                const answers = [];
+                let correctAnswerIndex = -1;
+                
+                for (let i = 1; i < actualParts.length; i++) {
+                    let answer = actualParts[i].trim();
+                    
+                    if (answer.endsWith('*')) {
+                        answer = answer.slice(0, -1).trim();
+                        correctAnswerIndex = i - 1;
+                    }
+                    
+                    answers.push(answer);
+                }
+                
+                if (answers.length !== 4) {
+                    console.warn(`Zusatzfrage ${index + 1} hat ${answers.length} Antworten: "${line}"`);
+                }
+                
+                if (correctAnswerIndex === -1) {
+                    console.warn(`Zusatzfrage ${index + 1} hat keine korrekte Antwort: "${line}"`);
+                    correctAnswerIndex = 0;
+                }
+                
+                return {
+                    question,
+                    answers,
+                    correctAnswerIndex,
+                    imageNumber,
+                    source: "additional",
+                    mainQuestionNumber: questionNumber,
+                    additionalIndex: index
+                };
+            });
         }
 
         // Fallback-Fragen verwenden
         function useFallbackQuestions() {
             console.log('Verwende Fallback-Fragen');
-            questions = [...fallbackQuestions];
-            totalQuestions = questions.length;
+            mainQuestions = fallbackQuestions.map((q, index) => ({
+                ...q,
+                questionNumber: index + 1
+            }));
+            
+            // Lade Zusatzfragen für Fallback-Fragen
+            mainQuestions.forEach(question => {
+                loadAdditionalQuestions(question.questionNumber);
+            });
+            
+            allQuestions = [...mainQuestions];
+            totalQuestions = allQuestions.length;
             totalQuestionsSpan.textContent = totalQuestions;
             updateProgress();
             showQuestion();
         }
 
-        // Frage anzeigen MIT BILD
+        // Frage anzeigen
         function showQuestion() {
             isAnswerSelected = false;
             answersContainer.innerHTML = '';
             
-            const currentQuestions = questions;
+            // Prüfe, ob wir in einer Wiederholungsrunde sind
+            const currentQuestions = currentRound === 1 ? allQuestions : wrongQuestions;
             const questionData = currentQuestions[currentQuestionIndex];
             
             if (!questionData) {
-                if (wrongQuestions.length > 0) {
-                    questions = [...wrongQuestions];
-                    wrongQuestions = [];
-                    currentQuestionIndex = 0;
+                if (wrongQuestions.length > 0 && currentRound === 1) {
+                    // Wechsel zur Wiederholungsrunde
                     currentRound++;
+                    currentQuestionIndex = 0;
+                    
+                    // Mische die Antworten für alle Wiederholungsfragen
+                    wrongQuestions = wrongQuestions.map(question => 
+                        shuffleQuestionAnswers(question)
+                    );
+                    
                     showQuestion();
                     return;
                 } else {
@@ -964,7 +1100,6 @@
             // Bild anzeigen oder ausblenden
             if (questionData.imageNumber && questionData.imageNumber !== "0000") {
                 imageCard.classList.remove('hidden');
-                // Setze das Bild mit onerror-Handler für fehlende Bilder
                 imageCard.innerHTML = `<img src="${questionData.imageNumber}.jpg" alt="Illustration zur Frage" onerror="this.style.display='none'; this.parentElement.classList.add('hidden')">`;
             } else {
                 imageCard.classList.add('hidden');
@@ -975,10 +1110,8 @@
             let roundText = '';
             if (currentRound === 1) {
                 roundText = 'Erste Runde';
-            } else if (currentRound === 2) {
-                roundText = 'Wiederholungsrunde';
             } else {
-                roundText = `${currentRound}. Wiederholungsrunde`;
+                roundText = `Wiederholungsrunde ${currentRound - 1}`;
             }
             
             statusText.textContent = `Frage ${currentQuestionIndex + 1} von ${currentQuestions.length} (${roundText})`;
@@ -1002,12 +1135,13 @@
             updateProgress();
         }
 
-        // Antwort auswählen - KORRIGIERTE VERSION
+        // Antwort auswählen
         function selectAnswer(selectedIndex) {
             if (isAnswerSelected) return;
             
             isAnswerSelected = true;
-            const questionData = questions[currentQuestionIndex];
+            const currentQuestions = currentRound === 1 ? allQuestions : wrongQuestions;
+            const questionData = currentQuestions[currentQuestionIndex];
             
             const answerCards = document.querySelectorAll('.answer-card');
             
@@ -1018,33 +1152,85 @@
             
             if (selectedIndex === questionData.correctAnswerIndex) {
                 answerCards[selectedIndex].classList.add('correct');
-                score++;
+                
+                // Nur in der ersten Runde Punkte vergeben
+                if (currentRound === 1) {
+                    score++;
+                }
             } else {
                 answerCards[selectedIndex].classList.add('wrong');
-                answerCards[questionData.correctAnswerIndex].classList.add('correct'); // KORREKTUR: classList statt classlist
-                wrongQuestions.push(questionData);
+                answerCards[questionData.correctAnswerIndex].classList.add('correct');
+                
+                // In der ersten Runde: Zur Wiederholungsliste hinzufügen
+                if (currentRound === 1) {
+                    // Hauptfrage zu Wiederholungsliste hinzufügen
+                    wrongQuestions.push(questionData);
+                    
+                    // Zusatzfragen für diese Frage laden und hinzufügen
+                    if (questionData.source === "main" && questionData.questionNumber) {
+                        const relatedAdditionalQuestions = additionalQuestions.filter(
+                            q => q.mainQuestionNumber === questionData.questionNumber
+                        );
+                        
+                        // Füge Zusatzfragen hinzu (wenn noch nicht in wrongQuestions)
+                        relatedAdditionalQuestions.forEach(addQuestion => {
+                            if (!wrongQuestions.some(q => 
+                                q.source === "additional" && 
+                                q.mainQuestionNumber === addQuestion.mainQuestionNumber &&
+                                q.additionalIndex === addQuestion.additionalIndex)) {
+                                wrongQuestions.push(addQuestion);
+                            }
+                        });
+                    }
+                }
+                // In Wiederholungsrunden: Frage bleibt in wrongQuestions
             }
             
             setTimeout(() => {
                 currentQuestionIndex++;
                 
-                if (currentQuestionIndex < questions.length) {
+                if (currentQuestionIndex < currentQuestions.length) {
                     showQuestion();
-                } else if (wrongQuestions.length > 0) {
-                    currentQuestionIndex = 0;
-                    questions = [...wrongQuestions];
-                    wrongQuestions = [];
-                    currentRound++;
-                    showQuestion();
+                } else if (currentRound === 1) {
+                    // Erste Runde beendet, starte Wiederholungsrunde
+                    if (wrongQuestions.length > 0) {
+                        currentQuestionIndex = 0;
+                        currentRound++;
+                        
+                        // Mische die Antworten für alle Wiederholungsfragen
+                        wrongQuestions = wrongQuestions.map(question => 
+                            shuffleQuestionAnswers(question)
+                        );
+                        
+                        showQuestion();
+                    } else {
+                        showResults();
+                    }
                 } else {
-                    showResults();
+                    // Wiederholungsrunde beendet
+                    if (wrongQuestions.length > 0) {
+                        // Noch falsche Fragen vorhanden, nächste Wiederholungsrunde
+                        currentQuestionIndex = 0;
+                        currentRound++;
+                        
+                        // Mische die Antworten erneut für die nächste Runde
+                        wrongQuestions = wrongQuestions.map(question => 
+                            shuffleQuestionAnswers(question)
+                        );
+                        
+                        showQuestion();
+                    } else {
+                        showResults();
+                    }
                 }
             }, 1500);
         }
 
         // Fortschrittsbalken aktualisieren
         function updateProgress() {
-            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            const currentQuestions = currentRound === 1 ? allQuestions : wrongQuestions;
+            const progress = currentQuestions.length > 0 ? 
+                ((currentQuestionIndex) / currentQuestions.length) * 100 : 0;
             progressBar.style.width = `${progress}%`;
         }
 
@@ -1079,6 +1265,8 @@
             wrongQuestions = [];
             score = 0;
             currentRound = 1;
+            loadedAdditionalFiles.clear();
+            additionalQuestions = [];
             
             document.querySelector('.question-card').style.display = 'block';
             imageCard.style.display = 'block';
@@ -1086,14 +1274,14 @@
             document.querySelector('.quiz-status').style.display = 'block';
             resultContainer.style.display = 'none';
             
-            loadQuestions();
+            loadMainQuestions();
         }
 
         // Event-Listener für Neustart-Button
         restartButton.addEventListener('click', restartQuiz);
 
         // Quiz beim Laden starten
-        document.addEventListener('DOMContentLoaded', loadQuestions);
+        document.addEventListener('DOMContentLoaded', loadMainQuestions);
     </script>
 </body>
 </html>
