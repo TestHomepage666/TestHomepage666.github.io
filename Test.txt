@@ -7,4 +7,3 @@ Welcher Artikel ist richtig? - der Baum* - das Baum - die Baum - den Baum - 0002
 Wie schreibt man die Zahl? - vierzig - vierzig* - vierzich - vierzigh - 0000
 Welche Zeitform ist Präsens? - Ich ging - Ich gehe* - Ich bin gegangen - Ich war gegangen - 0001
 Welches Wort hat einen Umlaut? - Schule - Schüle* - Schuele - Shule - 0000
-Wie lautet der korrekte Vergleich? - größer* - größerer - am größten - groß - 0002
