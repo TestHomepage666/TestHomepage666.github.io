@@ -744,9 +744,9 @@
         // Quiz-Daten
         let mainQuestions = []; // Fragen aus Test.txt (max. 9)
         let additionalQuestions = []; // Fragen aus Zusatzdateien (1.txt, 2.txt, etc.)
-        let allQuestions = []; // Alle Fragen (Hauptfragen + Zusatzfragen)
+        let currentQuestions = []; // Aktuelle Fragenliste (für die aktuelle Runde)
         let currentQuestionIndex = 0;
-        let wrongQuestions = []; // Falsch beantwortete Fragen
+        let wrongQuestions = []; // Falsch beantwortete Fragen für die nächste Runde
         let score = 0;
         let totalQuestions = 0;
         let isAnswerSelected = false;
@@ -777,7 +777,8 @@
                 correctAnswerIndex: 1,
                 imageNumber: "0000",
                 source: "main",
-                originalIndex: 0
+                originalIndex: 0,
+                questionNumber: 1
             },
             {
                 question: "Was ist richtig geschrieben?",
@@ -785,7 +786,8 @@
                 correctAnswerIndex: 3,
                 imageNumber: "0000",
                 source: "main",
-                originalIndex: 1
+                originalIndex: 1,
+                questionNumber: 2
             },
             {
                 question: "Welches Wort ist ein Nomen?",
@@ -793,7 +795,8 @@
                 correctAnswerIndex: 2,
                 imageNumber: "0000",
                 source: "main",
-                originalIndex: 2
+                originalIndex: 2,
+                questionNumber: 3
             }
         ];
 
@@ -967,7 +970,8 @@
                     imageNumber,
                     source: "main",
                     originalIndex: index,
-                    questionNumber: index + 1
+                    questionNumber: index + 1,
+                    id: `main-${index}`
                 };
             }).filter(question => question !== null);
             
@@ -980,9 +984,9 @@
                 loadAdditionalQuestions(question.questionNumber);
             });
             
-            // Initialisiere allQuestions mit Hauptfragen
-            allQuestions = [...mainQuestions];
-            totalQuestions = allQuestions.length;
+            // Initialisiere currentQuestions mit Hauptfragen
+            currentQuestions = [...mainQuestions];
+            totalQuestions = currentQuestions.length;
             totalQuestionsSpan.textContent = totalQuestions;
             updateProgress();
             showQuestion();
@@ -1041,7 +1045,8 @@
                     imageNumber,
                     source: "additional",
                     mainQuestionNumber: questionNumber,
-                    additionalIndex: index
+                    additionalIndex: index,
+                    id: `additional-${questionNumber}-${index}`
                 };
             });
         }
@@ -1051,7 +1056,8 @@
             console.log('Verwende Fallback-Fragen');
             mainQuestions = fallbackQuestions.map((q, index) => ({
                 ...q,
-                questionNumber: index + 1
+                questionNumber: index + 1,
+                id: `main-${index}`
             }));
             
             // Lade Zusatzfragen für Fallback-Fragen
@@ -1059,8 +1065,8 @@
                 loadAdditionalQuestions(question.questionNumber);
             });
             
-            allQuestions = [...mainQuestions];
-            totalQuestions = allQuestions.length;
+            currentQuestions = [...mainQuestions];
+            totalQuestions = currentQuestions.length;
             totalQuestionsSpan.textContent = totalQuestions;
             updateProgress();
             showQuestion();
@@ -1071,27 +1077,12 @@
             isAnswerSelected = false;
             answersContainer.innerHTML = '';
             
-            // Prüfe, ob wir in einer Wiederholungsrunde sind
-            const currentQuestions = currentRound === 1 ? allQuestions : wrongQuestions;
             const questionData = currentQuestions[currentQuestionIndex];
             
             if (!questionData) {
-                if (wrongQuestions.length > 0 && currentRound === 1) {
-                    // Wechsel zur Wiederholungsrunde
-                    currentRound++;
-                    currentQuestionIndex = 0;
-                    
-                    // Mische die Antworten für alle Wiederholungsfragen
-                    wrongQuestions = wrongQuestions.map(question => 
-                        shuffleQuestionAnswers(question)
-                    );
-                    
-                    showQuestion();
-                    return;
-                } else {
-                    showResults();
-                    return;
-                }
+                // Wenn keine Frage mehr in der aktuellen Liste, starte nächste Runde
+                startNextRound();
+                return;
             }
             
             // Frage anzeigen
@@ -1135,12 +1126,35 @@
             updateProgress();
         }
 
+        // Nächste Runde starten
+        function startNextRound() {
+            if (wrongQuestions.length === 0) {
+                // Keine falsch beantworteten Fragen mehr, zeige Ergebnisse
+                showResults();
+                return;
+            }
+            
+            // Nächste Runde vorbereiten
+            currentRound++;
+            currentQuestionIndex = 0;
+            
+            // Mische die Antworten für alle Fragen in der neuen Runde
+            currentQuestions = wrongQuestions.map(question => 
+                shuffleQuestionAnswers(question)
+            );
+            
+            // Leere wrongQuestions für die neue Runde
+            wrongQuestions = [];
+            
+            updateProgress();
+            showQuestion();
+        }
+
         // Antwort auswählen
         function selectAnswer(selectedIndex) {
             if (isAnswerSelected) return;
             
             isAnswerSelected = true;
-            const currentQuestions = currentRound === 1 ? allQuestions : wrongQuestions;
             const questionData = currentQuestions[currentQuestionIndex];
             
             const answerCards = document.querySelectorAll('.answer-card');
@@ -1157,78 +1171,47 @@
                 if (currentRound === 1) {
                     score++;
                 }
+                
+                // Frage wird nicht zu wrongQuestions hinzugefügt (da richtig beantwortet)
             } else {
                 answerCards[selectedIndex].classList.add('wrong');
                 answerCards[questionData.correctAnswerIndex].classList.add('correct');
                 
-                // In der ersten Runde: Zur Wiederholungsliste hinzufügen
-                if (currentRound === 1) {
-                    // Hauptfrage zu Wiederholungsliste hinzufügen
+                // Frage zu wrongQuestions hinzufügen (für nächste Runde)
+                if (!wrongQuestions.some(q => q.id === questionData.id)) {
                     wrongQuestions.push(questionData);
-                    
-                    // Zusatzfragen für diese Frage laden und hinzufügen
-                    if (questionData.source === "main" && questionData.questionNumber) {
-                        const relatedAdditionalQuestions = additionalQuestions.filter(
-                            q => q.mainQuestionNumber === questionData.questionNumber
-                        );
-                        
-                        // Füge Zusatzfragen hinzu (wenn noch nicht in wrongQuestions)
-                        relatedAdditionalQuestions.forEach(addQuestion => {
-                            if (!wrongQuestions.some(q => 
-                                q.source === "additional" && 
-                                q.mainQuestionNumber === addQuestion.mainQuestionNumber &&
-                                q.additionalIndex === addQuestion.additionalIndex)) {
-                                wrongQuestions.push(addQuestion);
-                            }
-                        });
-                    }
                 }
-                // In Wiederholungsrunden: Frage bleibt in wrongQuestions
+                
+                // In der ersten Runde: Zusatzfragen für diese Frage laden und hinzufügen
+                if (currentRound === 1 && questionData.source === "main" && questionData.questionNumber) {
+                    const relatedAdditionalQuestions = additionalQuestions.filter(
+                        q => q.mainQuestionNumber === questionData.questionNumber
+                    );
+                    
+                    // Füge Zusatzfragen hinzu (wenn noch nicht in wrongQuestions)
+                    relatedAdditionalQuestions.forEach(addQuestion => {
+                        if (!wrongQuestions.some(q => q.id === addQuestion.id)) {
+                            wrongQuestions.push(addQuestion);
+                        }
+                    });
+                }
             }
             
             setTimeout(() => {
                 currentQuestionIndex++;
                 
                 if (currentQuestionIndex < currentQuestions.length) {
+                    // Nächste Frage in der aktuellen Runde
                     showQuestion();
-                } else if (currentRound === 1) {
-                    // Erste Runde beendet, starte Wiederholungsrunde
-                    if (wrongQuestions.length > 0) {
-                        currentQuestionIndex = 0;
-                        currentRound++;
-                        
-                        // Mische die Antworten für alle Wiederholungsfragen
-                        wrongQuestions = wrongQuestions.map(question => 
-                            shuffleQuestionAnswers(question)
-                        );
-                        
-                        showQuestion();
-                    } else {
-                        showResults();
-                    }
                 } else {
-                    // Wiederholungsrunde beendet
-                    if (wrongQuestions.length > 0) {
-                        // Noch falsche Fragen vorhanden, nächste Wiederholungsrunde
-                        currentQuestionIndex = 0;
-                        currentRound++;
-                        
-                        // Mische die Antworten erneut für die nächste Runde
-                        wrongQuestions = wrongQuestions.map(question => 
-                            shuffleQuestionAnswers(question)
-                        );
-                        
-                        showQuestion();
-                    } else {
-                        showResults();
-                    }
+                    // Runde beendet, starte nächste Runde
+                    startNextRound();
                 }
             }, 1500);
         }
 
         // Fortschrittsbalken aktualisieren
         function updateProgress() {
-            const currentQuestions = currentRound === 1 ? allQuestions : wrongQuestions;
             const progress = currentQuestions.length > 0 ? 
                 ((currentQuestionIndex) / currentQuestions.length) * 100 : 0;
             progressBar.style.width = `${progress}%`;
@@ -1267,6 +1250,7 @@
             currentRound = 1;
             loadedAdditionalFiles.clear();
             additionalQuestions = [];
+            currentQuestions = [];
             
             document.querySelector('.question-card').style.display = 'block';
             imageCard.style.display = 'block';
