@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressum & Datenschutz - Astrid-Lindgren-Schule Duisburg</title>
+    <style>
+        /* Basis-Styles - Identisch zu UnsereSchule.html */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        /* Header */
+        header {
+            background-color: rgba(52, 73, 94, 0.7);
+            color: white;
+            padding: 0.7rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-image: url('001.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(52, 73, 94, 0.7);
+            z-index: -1;
+        }
+        .logo-container { display: flex; align-items: center; }
+        .logo { height: 60px; width: auto; }
+        .contact-info { display: flex; gap: 5rem; align-items: center; }
+        .contact-item { display: flex; align-items: center; gap: 0.7rem; font-size: 1.2rem; }
+        .contact-icon { height: 25px; width: auto; }
+        /* Menü */
+        .menu-toggle { display: none; }
+        .menu-button {
+            display: flex; flex-direction: column; justify-content: space-between;
+            width: 25px; height: 18px; cursor: pointer;
+        }
+        .menu-button span {
+            display: block; height: 2.5px; width: 100%;
+            background-color: white; border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        .menu {
+            position: absolute; top: 100%; right: 0;
+            background-color: rgba(52, 73, 94, 0.7); width: 200px;
+            border-radius: 0 0 0 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0; visibility: hidden; transform: translateY(-10px);
+            transition: all 0.3s ease; backdrop-filter: blur(10px);
+            background-image: url('001.jpg');
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        .menu::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(52, 73, 94, 0.7); z-index: -1;
+            border-radius: 0 0 0 10px;
+        }
+        .menu-toggle:checked ~ .menu {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+        .menu-toggle:checked ~ .menu-button span:nth-child(1) {
+            transform: rotate(45deg) translate(4px, 4px); background-color: white;
+        }
+        .menu-toggle:checked ~ .menu-button span:nth-child(2) { opacity: 0; }
+        .menu-toggle:checked ~ .menu-button span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -5px); background-color: white;
+        }
+        .menu ul { list-style: none; padding: 0; }
+        .menu li { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .menu li:last-child { border-bottom: none; }
+        .menu a {
+            display: block; padding: 12px 20px; color: white;
+            text-decoration: none; transition: all 0.3s; text-align: center;
+        }
+        .menu a:hover { background-color: rgba(61, 86, 110, 0.5); color: white; }
+        /* Hauptinhalt */
+        main {
+            max-width: 1200px; margin: 0 auto;
+            padding: 2.5rem 2rem 2rem; color: #2c3e50;
+        }
+        .intro { text-align: center; margin-bottom: 3rem; padding: 0 1rem; }
+        .intro h1 { font-size: 2.2rem; color: #2c3e50; margin-bottom: 1rem; }
+        .intro p { font-size: 1.1rem; max-width: 800px; margin: 0 auto; color: #2c3e50; }
+
+        /* Impressum/Datenschutz spezifische Styles */
+        .impressum-container {
+            background: white; border-radius: 8px; padding: 2.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;
+            border-top: 6px solid #c0d110;
+        }
+        .impressum-container h2 {
+            color: #c0d110; margin: 0 0 2rem 0; font-size: 1.8rem;
+            padding-bottom: 1rem; border-bottom: 2px solid #f0f2f5;
+        }
+        .impressum-container h3 {
+            color: #2c3e50; margin: 2.5rem 0 1.5rem 0; font-size: 1.5rem;
+        }
+        .impressum-container h4 {
+            color: #c0d110; margin: 1.5rem 0 0.8rem 0; font-size: 1.2rem;
+        }
+        .impressum-container p, .impressum-container li {
+            margin-bottom: 1rem; font-size: 1.1rem; line-height: 1.7;
+        }
+        .impressum-container ul, .impressum-container ol {
+            margin: 1rem 0 1.5rem 2rem; line-height: 1.7;
+        }
+        .impressum-container strong { font-weight: 600; }
+        .impressum-container em { font-style: italic; }
+
+        /* Inhaltsbereiche */
+        .bereich {
+            margin-bottom: 3rem; padding-bottom: 2.5rem;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .bereich:last-of-type { border-bottom: none; }
+        .person-details {
+            background-color: #f8f9fa; border-radius: 8px;
+            padding: 1.5rem; margin-top: 1rem;
+            border-left: 4px solid #c0d110;
+        }
+        .kontakt-info-item {
+            display: flex; align-items: flex-start; gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+        .kontakt-icon { height: 20px; width: auto; margin-top: 0.2rem; }
+
+        /* Rechtliche Abschnitte */
+        .rechtlicher-abschnitt {
+            background-color: #f8f9fa; border-radius: 8px;
+            padding: 1.5rem; margin: 1.5rem 0;
+            border: 1px solid #eaeaea;
+        }
+        .info-box {
+            background-color: rgba(192, 209, 16, 0.05);
+            border-radius: 6px; padding: 1rem 1.5rem;
+            margin: 1.5rem 0; border-left: 3px solid #c0d110;
+            font-size: 1rem;
+        }
+        .back-button {
+            display: inline-block; background-color: #c0d110;
+            color: white; padding: 0.8rem 1.5rem; border-radius: 5px;
+            text-decoration: none; font-weight: bold; margin-top: 2rem;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover { background-color: #a9b80e; }
+        /* Footer */
+        footer {
+            background-color: rgba(52, 73, 94, 0.7); color: white;
+            padding: 1.2rem 2rem; margin-top: 3rem;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px); background-image: url('001.jpg');
+            background-size: cover; background-position: center;
+            background-attachment: fixed; position: relative;
+        }
+        footer::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(52, 73, 94, 0.7); z-index: -1;
+        }
+        .footer-left { font-size: 1rem; }
+        .footer-contact { display: flex; gap: 5rem; align-items: center; }
+        .footer-logo { height: 50px; width: auto; }
+        /* Responsive Design */
+        @media (max-width: 1100px) {
+            .contact-info, .footer-contact {
+                flex-direction: column; gap: 1rem; align-items: flex-end;
+            }
+        }
+        @media (max-width: 768px) {
+            header { padding: 0.5rem 1rem; flex-wrap: wrap; }
+            .logo { height: 40px; }
+            .contact-info { display: none; }
+            main { padding: 2rem 1rem 1rem; }
+            .intro h1 { font-size: 1.8rem; }
+            .impressum-container { padding: 1.5rem; }
+            .impressum-container h2 { font-size: 1.5rem; }
+            .impressum-container h3 { font-size: 1.3rem; }
+            footer {
+                padding: 1rem; flex-direction: column;
+                gap: 1.5rem; text-align: center;
+            }
+            .footer-contact { align-items: center; gap: 1.5rem; }
+            .footer-logo { height: 35px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="logo2.png" alt="Astrid-Lindgren-Schule Duisburg" class="logo">
+        </div>
+        <div class="contact-info">
+            <div class="contact-item">
+                <img src="icon3.png" alt="Telefon" class="contact-icon">
+                <span>0203 - 332667</span>
+            </div>
+            <div class="contact-item">
+                <img src="icon4.png" alt="E-Mail" class="contact-icon">
+                <span>GGS.AstridLindgrenSchule@stadt-duisburg.de</span>
+            </div>
+        </div>
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="menu-button">
+            <span></span><span></span><span></span>
+        </label>
+        <nav class="menu">
+            <ul>
+                <li><a href="Aktuelles.html">Aktuelles</a></li>
+                <li><a href="UnsereSchule.html">Unsere Schule</a></li>
+                <li><a href="Termine.html">Termine</a></li>
+                <li><a href="Kontakt.html">Kontakt</a></li>
+                <li><a href="Impressum.html">Impressum</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="impressum-container">
+            <div class="bereich">
+                <h2>Impressum</h2>
+                <h3>Verantwortlich für den Inhalt</h3>
+                <div class="person-details">
+                    <p><strong>Astrid Niermann</strong><br>
+                    GGS Astrid-Lindgren-Schule mit Montessori-Zweig<br>
+                    Aakerfährstraße 80<br>
+                    47058 Duisburg</p>
+                    <div class="kontakt-info-item">
+                        <img src="icon1.png" alt="Telefon" class="kontakt-icon">
+                        <span><strong>Telefon:</strong> 0203/332667</span>
+                    </div>
+                    <div class="kontakt-info-item">
+                        <img src="icon2.png" alt="Fax" class="kontakt-icon">
+                        <span><strong>Telefax:</strong> 0203/334745</span>
+                    </div>
+                    <div class="kontakt-info-item">
+                        <img src="icon2.png" alt="E-Mail" class="kontakt-icon">
+                        <span><strong>E-Mail:</strong> GGS.AstridLindgrenSchule@stadt-duisburg.de</span>
+                    </div>
+                </div>
+                <p><strong>Verantwortlich für die veröffentlichten Texte:</strong> Astrid Niermann, Rektorin Astrid-Lindgren-Schule, 47058 Duisburg</p>
+                <p><strong>Verantwortlich für die veröffentlichten Fotos:</strong> Astrid Niermann, Rektorin Astrid-Lindgren-Schule, 47058 Duisburg</p>
+                <div class="info-box">
+                    <p><strong>Quelle:</strong> eRecht24.de – Internetrecht von Rechtsanwalt Sören Siebert</p>
+                </div>
+                <h3>Haftungsausschluss</h3>
+                <h4>Haftung für Inhalte</h4>
+                <p>Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte (insbesondere Termine) können wir trotzdem keine Gewähr übernehmen.</p>
+                <p>Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei bekannt werden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.</p>
+                <h4>Haftung für Links</h4>
+                <p>Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.</p>
+                <h4>Urheberrecht</h4>
+                <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.</p>
+            </div>
+            <div class="bereich">
+                <h2>Datenschutz</h2>
+                <h3>Verantwortlicher und Datenschutzbeauftragter</h3>
+                <p><strong>Verantwortlicher gem. Art. 4 Nr. 7 EU-Datenschutz-Grundverordnung (EU-DSGVO) ist:</strong></p>
+                <div class="person-details">
+                    <p><strong>GGS Astrid Lindgren Schule</strong><br>
+                    Astrid Niermann (Schulleiterin)<br>
+                    Aakerfährstraße 80<br>
+                    47058 Duisburg<br>
+                    GGS.AstridLindgrenSchule@Stadt-Duisburg.de</p>
+                </div>
+                <p><strong>Die/den schulischen Datenschutzbeauftragten erreichen Sie unter</strong><br>
+                k.tenner@stadt-duisburg.de oder über die nachfolgende Postadresse:</p>
+                <div class="person-details">
+                    <p><strong>Herrn Tenner</strong><br>
+                    Europaschule Krupp-Gymnasium<br>
+                    Flutweg 62<br>
+                    47228 Duisburg</p>
+                </div>
+                <h3>Ihre Rechte als Nutzer</h3>
+                <p>Sie haben nach Maßgabe der Artikel 15, 16, 17, 18 und 21 EU-DSGVO gegenüber uns folgende Rechte hinsichtlich der Sie betreffenden personenbezogenen Daten:</p>
+                <ul>
+                    <li>Recht auf Auskunft,</li>
+                    <li>Recht auf Berichtigung oder Löschung,</li>
+                    <li>Recht auf Einschränkung der Verarbeitung,</li>
+                    <li>Recht auf Widerspruch gegen die Verarbeitung,</li>
+                    <li>Recht auf Datenübertragbarkeit.</li>
+                </ul>
+                <p>Wenn Sie der Auffassung sind, dass eine Verarbeitung Ihrer personenbezogener Daten gegen Datenschutzrecht verstößt, haben Sie das Recht, sich bei der zuständigen Aufsichtsbehörde zu beschweren, die Sie unter folgenden Kontaktdaten erreichen können:</p>
+                <div class="person-details">
+                    <p><strong>Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen</strong><br>
+                    Postfach 20 04 44<br>
+                    40102 Düsseldorf<br>
+                    <strong>Tel.:</strong> 0211/38424-0<br>
+                    <strong>Fax:</strong> 0211/38424-10<br>
+                    <strong>E-Mail:</strong> poststelle@ldi.nrw.de</p>
+                </div>
+                <h3>Hinweise zur Datenverarbeitung</h3>
+                <div class="rechtlicher-abschnitt">
+                    <p><strong>(1)</strong> Bei dem Aufruf unserer Website werden personenbezogene Daten erhoben. Dies ist aus technischen Gründen erforderlich, um Ihnen unsere Website anzuzeigen und die Stabilität und Sicherheit zu gewährleisten. Rechtsgrundlage ist Art. 6 Abs. 1 S. 1 lit. e, Abs. 3 EU-DSGVO in Verbindung mit § 3 Abs. 1 Datenschutzgesetz Nordrhein-Westfalen (DSG NRW).</p>
+                    <p>Das Internetoffer der Schule wird bei Strato gehostet. Bei jedem Zugriff auf Inhalte des Internetangebotes werden dort personenbezogene Daten empfangen und vorübergehend bis zu sechs Monate über sogenannte Protokoll- oder Log-Dateien gespeichert.</p>
+                    <p>Die folgenden Daten werden bei jedem Aufruf der Internetseite erhoben:</p>
+                    <ul>
+                        <li>IP-Adresse</li>
+                        <li>Datum und Uhrzeit des Abrufs</li>
+                        <li>Inhalt der Anforderung (konkrete Seite)</li>
+                        <li>Zugriffsstatus/HTTP-Statuscode</li>
+                        <li>jeweils übertragene Datenmenge</li>
+                        <li>Website, von der die Anforderung kommt</li>
+                        <li>Browser</li>
+                        <li>Betriebssystem und dessen Oberfläche</li>
+                        <li>Sprache und Version der Browsersoftware.</li>
+                    </ul>
+                    <p>Wir weisen darauf hin, dass Betreiber von fremden Internetseiten, die vom Portal aus verlinkt werden, die Daten von Besucherinnen bzw. Besuchern dieser Internetseiten erheben und auswerten können.</p>
+                </div>
+                <div class="rechtlicher-abschnitt">
+                    <p><strong>(2)</strong> Bei Ihrer Kontaktaufnahme mit uns per E-Mail oder über ein Kontaktformular müssen die von Ihnen freiwillig mitgeteilten Daten (Ihre E-Mail-Adresse, ggf. Ihr Name und Ihre Telefonnummer) gespeichert werden, um Ihrem Anliegen entgegen kommen zu können.</p>
+                    <p>Rechtsgrundlage ist Art. 6 Abs. 1 S. 1 lit. e, Abs. 3 EU-DSGVO in Verbindung mit § 3 Abs. 1 Datenschutzgesetz Nordrhein-Westfalen (DSG NRW).</p>
+                    <p>Die von Ihnen eingegebenen persönlichen Daten verwenden wir nur zu dem von Ihnen gewünschten Zweck. Die in diesem Zusammenhang anfallenden Daten löschen wir, nachdem die Speicherung nicht mehr erforderlich ist.</p>
+                </div>
+                <h3>Nutzung von Cookies</h3>
+                <div class="rechtlicher-abschnitt">
+                    <p>Das Homepage-Angebot verwendet sogenannte „Cookies“. Bei Cookies handelt es sich um kleinen Textdateien, die auf Ihrem Rechner abgelegt werden und die Ihr Browser speichert. Diese dienen dazu, unser Angebot für Sie nutzerfreundlicher und effektiver zu machen. Rechtsgrundlage ist Art. 6 Abs. 1 S. 1 lit. e, Abs. 3 EU-DSGVO in Verbindung mit § 3 Abs. 1 Datenschutzgesetz Nordrhein-Westfalen (DSG NRW).</p>
+                    <p>Sie können die Verwendung von Cookies dadurch unterbinden, indem Sie Ihren Internetbrowser so einstellen, dass dieser keine Cookies akzeptiert. Sie können in Ihrem Browser aber auch festlegen, ob Sie über das Setzen von Cookies informiert werden möchten und Cookies nur im Einzelfall erlauben, ob Sie die Annahme von Cookies für bestimmte Fälle oder eben auch generell ausschließen. Außerdem können Sie das automatische Löschen der Cookies beim Schließen des Browser aktivieren. Wie man das macht, hängt von Ihrem Browser ab.</p>
+                    <p>Beim erstmaligen Besuch des Internetangebotes bzw. einer Seite werden Sie automatisch auf die Cookie-Nutzung hingewiesen.</p>
+                </div>
+                <div class="info-box">
+                    <p><strong>Quellverweis:</strong> Disclaimer von eRecht24, dem Portal zum Internetrecht von Rechtsanwalt Sören Siebert, Datenschutzerklärung Google Analytics</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-left">
+            <p>&copy;2025 Astrid-Lindgren-Schule Duisburg</p>
+        </div>
+        <div class="footer-contact">
+            <div class="contact-item">
+                <img src="icon3.png" alt="Telefon" class="contact-icon">
+                <span>0203 - 332667</span>
+            </div>
+            <div class="contact-item">
+                <img src="icon4.png" alt="E-Mail" class="contact-icon">
+                <span>GGS.AstridLindgrenSchule@stadt-duisburg.de</span>
+            </div>
+        </div>
+        <img src="logo2.png" alt="Astrid-Lindgren-Schule Duisburg" class="footer-logo">
+    </footer>
+</body>
+</html>
