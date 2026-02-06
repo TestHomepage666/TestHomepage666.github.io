@@ -423,9 +423,10 @@
             align-items: center;
         }
 
-        /* Verkleinerte Schriftgröße für E-Mail-Adresse im Footer (beide Kontakt-Items) */
+        /* Verkleinerte Schriftgröße für E-Mail-Adresse im Footer und verhindere Zeilenumbruch */
         .footer-contact .contact-item {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            white-space: nowrap; /* WICHTIG: Verhindert Zeilenumbruch */
         }
 
         .footer-logo {
@@ -512,6 +513,7 @@
             .footer-contact {
                 align-items: center;
                 gap: 1.5rem;
+                flex-direction: column;
             }
             
             .footer-logo {
@@ -521,6 +523,7 @@
             /* Auf mobilen Geräten noch kleinere Schrift für Footer-Kontakt */
             .footer-contact .contact-item {
                 font-size: 0.8rem;
+                white-space: nowrap; /* Auch auf mobilen Geräten Zeilenumbruch verhindern */
             }
         }
 
