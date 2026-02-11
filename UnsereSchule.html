@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta-Tag verhindert automatische Telefon-Verlinkung auf Apple-Geräten -->
+    <meta name="format-detection" content="telephone=no">
     <title>Astrid-Lindgren-Schule Duisburg</title>
     <style>
         * {
@@ -71,6 +73,12 @@
             align-items: center;
             gap: 0.7rem;
             font-size: 1.2rem;
+        }
+
+        /* --- NEU: Styling für automatisch erzeugte Telefon-/Mail-Links --- */
+        .contact-item a {
+            color: inherit;      /* Erbt die weiße Schriftfarbe des Headers/Footers */
+            text-decoration: none; /* Entfernt die Unterstreichung */
         }
 
         .contact-icon {
@@ -581,42 +589,34 @@
     </section>
     
     <section class="content-grid">
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Leitbild.html" class="card color-yellow bg-leitbild farbecht no-overlay">
             <h3>Unser Leitbild</h3>
         </a>
         
-        <!-- Diese Card behält ihre Eigenschaften -->
         <a href="MariaMontessori.html" class="card color-green bg-montessori farbecht no-overlay">
             <h3>Maria Montessori<br>Pädagogik</h3>
         </a>
         
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Klassen.html" class="card color-green bg-klassen farbecht no-overlay">
             <h3>Unsere Klassen</h3>
         </a>
 
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Team.html" class="card color-yellow bg-team farbecht no-overlay">
             <h3>Unser Team</h3>
         </a>
        
-       <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Projekte.html" class="card color-yellow no-overlay">
             <h3>Unsere Projekte</h3>
         </a> 
 
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Erziehungsvereinbarung.html" class="card color-green bg-logo farbecht no-overlay">
             <h3>Erziehungs-<br>vereinbarung</h3>
         </a>
         
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Foerderverein.html" class="card color-green bg-foerderverein farbecht no-overlay">
             <h3>Unser Förderverein</h3>
         </a>
 
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Ganztag.html" class="card color-yellow farbecht no-overlay">
             <h3>Offener Ganztag</h3>
         </a>
