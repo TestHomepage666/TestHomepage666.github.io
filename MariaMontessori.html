@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta-Tag verhindert automatische Telefon-Verlinkung auf Apple-Geräten -->
+    <meta name="format-detection" content="telephone=no">
     <title>Maria Montessori Pädagogik - Astrid-Lindgren-Schule Duisburg</title>
     <style>
         * {
@@ -65,6 +67,13 @@
             gap: 0.7rem;
             font-size: 1.2rem;
         }
+
+        /* --- NEU: Styling für automatisch erzeugte Telefon-/Mail-Links (Apple-Fix) --- */
+        .contact-item a {
+            color: inherit;      /* Erbt die weiße Schriftfarbe des Headers/Footers */
+            text-decoration: none; /* Entfernt die Unterstreichung */
+        }
+
         .contact-icon {
             height: 25px;
             width: auto;
@@ -328,17 +337,19 @@
             width: auto;
         }
 
-        /* Responsive Design - Aus UnsereSchule.html */
+        /* --- ANGEpasst: Zentrierung im Tablet-Hochformat (bis 1100px) --- */
         @media (max-width: 1100px) {
             .contact-info {
                 flex-direction: column;
                 gap: 1rem;
-                align-items: flex-end;
+                align-items: center;   /* geändert von flex-end zu center */
+                text-align: center;    /* neu – für saubere Zentrierung */
             }
             .footer-contact {
                 flex-direction: column;
                 gap: 1rem;
-                align-items: flex-end;
+                align-items: center;   /* geändert von flex-end zu center */
+                text-align: center;    /* neu */
             }
         }
         @media (max-width: 768px) {
@@ -401,7 +412,7 @@
     </style>
 </head>
 <body>
-    <!-- Header aus UnsereSchule.html -->
+    <!-- Header aus UnsereSchule.html (mit Apple-Fix und zentrierter Ausrichtung) -->
     <header>
         <div class="logo-container">
             <img src="logo2.png" alt="Astrid-Lindgren-Schule Duisburg" class="logo">
@@ -565,7 +576,7 @@
         </section>
     </main>
 
-    <!-- Footer aus UnsereSchule.html -->
+    <!-- Footer aus UnsereSchule.html (mit zentrierter Ausrichtung ab 1100px) -->
     <footer>
         <div class="footer-left">
             <p>&copy;2025 Astrid-Lindgren-Schule Duisburg</p>
