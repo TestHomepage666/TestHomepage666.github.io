@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta-Tag verhindert automatische Telefon-Verlinkung auf Apple-Geräten -->
+    <meta name="format-detection" content="telephone=no">
     <title>Termine - Astrid-Lindgren-Schule Duisburg</title>
     <style>
         * {
@@ -71,6 +73,12 @@
             align-items: center;
             gap: 0.7rem;
             font-size: 1.2rem;
+        }
+
+        /* --- NEU: Styling für automatisch erzeugte Telefon-/Mail-Links (Apple-Fix) --- */
+        .contact-item a {
+            color: inherit;      /* Erbt die weiße Schriftfarbe des Headers/Footers */
+            text-decoration: none; /* Entfernt die Unterstreichung */
         }
 
         .contact-icon {
@@ -392,17 +400,20 @@
         }
 
         /* Responsive Design */
+        /* --- ANGEpasst: Zentrierung im Tablet-Hochformat (bis 1100px) --- */
         @media (max-width: 1100px) {
             .contact-info {
                 flex-direction: column;
                 gap: 1rem;
-                align-items: flex-end;
+                align-items: center;   /* geändert von flex-end zu center */
+                text-align: center;    /* neu – für saubere Zentrierung */
             }
             
             .footer-contact {
                 flex-direction: column;
                 gap: 1rem;
-                align-items: flex-end;
+                align-items: center;   /* geändert von flex-end zu center */
+                text-align: center;    /* neu */
             }
         }
 
