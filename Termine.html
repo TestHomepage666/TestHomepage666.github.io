@@ -280,6 +280,16 @@
             background-color: rgba(192, 209, 16, 0.1); /* Hellgrün für Hover */
         }
 
+        /* Verhindert Viewport-Aufweitung auf Tablets und Handys */
+    @media (max-width: 1100px) {
+        .timetable {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+
         .highlight {
             background-color: rgba(192, 209, 16, 0.15) !important;
             font-weight: 600;
