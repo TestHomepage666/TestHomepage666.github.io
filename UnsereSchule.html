@@ -507,12 +507,15 @@
             }
             
             .card {
-                padding: 1rem 1.5rem;
-                height: 180px; /* Etwas kleiner auf Mobilgeräten */
+                aspect-ratio: 16 / 9;
+                display: flex;
+                align-items: center;      /* Text vertikal zentrieren */
+                padding: 1rem;            /* Innenabstand */
             }
-            
+
             .card h3 {
-                font-size: 1.6rem; /* Etwas kleinere Schrift auf Mobilgeräten */
+                font-size: clamp(1.2rem, 5vw, 1.8rem); /* fließende Schriftgröße */
+                max-width: 80%;           /* wie gehabt */
             }
             
             footer {
