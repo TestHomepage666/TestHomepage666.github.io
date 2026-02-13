@@ -473,6 +473,12 @@
                 flex-wrap: nowrap; /* Verhindert Umbruch in zwei Zeilen */
             }
             
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+            .card {
+                height: 280px;  /* größere Höhe für breitere Cards */
+            }
+            }
+
             .logo {
                 height: 50px;
             }
@@ -507,15 +513,12 @@
             }
             
             .card {
-                aspect-ratio: 16 / 9;
-                display: flex;
-                align-items: center;      /* Text vertikal zentrieren */
-                padding: 1rem;            /* Innenabstand */
+                padding: 1rem 1.5rem;
+                height: 180px; /* Etwas kleiner auf Mobilgeräten */
             }
-
+            
             .card h3 {
-                font-size: clamp(1.2rem, 5vw, 1.8rem); /* fließende Schriftgröße */
-                max-width: 80%;           /* wie gehabt */
+                font-size: 1.6rem; /* Etwas kleinere Schrift auf Mobilgeräten */
             }
             
             footer {
