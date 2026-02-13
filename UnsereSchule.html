@@ -222,7 +222,7 @@
             gap: 2rem;
         }
 
-        /* NEUE CARD-STILE: Überschrift mittig linksausgerichtet */
+        /* NEUE CARD-STILE: festes Seitenverhältnis, keine feste Höhe mehr */
         .card {
             background: white;
             border-radius: 8px;
@@ -230,9 +230,11 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             border-top: 6px solid #2c3e50;
-            height: 200px; /* Feste Höhe für bessere Konsistenz */
+            /* height: 200px;  – ENTFERNT */
+            aspect-ratio: 16 / 9;    /* Einheitliches Seitenverhältnis */
+            width: 100%;              /* Nimmt die volle Breite des Grid-Elements ein */
             display: flex;
-            align-items: center; /* Vertikal zentriert */
+            align-items: center;      /* Vertikal zentriert */
             color: #2c3e50;
             text-decoration: none;
             cursor: pointer;
@@ -344,7 +346,7 @@
 
         /* NEUE ÜBERSCHRIFT-STILE: Mittig linksausgerichtet und größer */
         .card h3 {
-            font-size: 1.8rem; /* Größere Schrift */
+            font-size: clamp(1.4rem, 4vw, 1.8rem); /* fließende Schriftgröße */
             line-height: 1.3; /* Für bessere Lesbarkeit bei zweizeiligen Überschriften */
             position: relative;
             z-index: 3;
@@ -473,12 +475,6 @@
                 flex-wrap: nowrap; /* Verhindert Umbruch in zwei Zeilen */
             }
             
-        @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-            .card {
-                height: 400px;  /* größere Höhe für breitere Cards */
-            }
-            }
-
             .logo {
                 height: 50px;
             }
@@ -512,13 +508,14 @@
                 font-size: 1.8rem;
             }
             
+            /* Keine feste Höhe für Cards mehr, aber Anpassung der Schrift */
             .card {
-                padding: 1rem 1.5rem;
-                height: 180px; /* Etwas kleiner auf Mobilgeräten */
+                /* height: 180px; – ENTFERNT */
+                padding: 1rem 1.5rem;  /* ggf. etwas weniger Padding */
             }
             
             .card h3 {
-                font-size: 1.6rem; /* Etwas kleinere Schrift auf Mobilgeräten */
+                font-size: clamp(1.2rem, 5vw, 1.6rem);
             }
             
             footer {
@@ -547,13 +544,9 @@
 
         @media (max-width: 480px) {
             .card h3 {
-                font-size: 1.4rem; /* Noch etwas kleinere Schrift auf sehr kleinen Geräten */
-                line-height: 1.2;
+                font-size: clamp(1rem, 4vw, 1.4rem); /* Noch etwas kleiner */
             }
-            
-            .card {
-                height: 160px;
-            }
+            /* height-Regeln für Cards entfernt */
         }
     </style>
 </head>
@@ -599,42 +592,35 @@
     </section>
     
     <section class="content-grid">
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
+        <!-- Cards mit festem Seitenverhältnis (16:9) und fließender Schrift -->
         <a href="Leitbild.html" class="card color-yellow bg-leitbild farbecht no-overlay">
             <h3>Unser Leitbild</h3>
         </a>
         
-        <!-- Diese Card behält ihre Eigenschaften -->
         <a href="MariaMontessori.html" class="card color-green bg-montessori farbecht no-overlay">
             <h3>Maria Montessori<br>Pädagogik</h3>
         </a>
         
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Klassen.html" class="card color-yellow bg-klassen farbecht no-overlay">
             <h3>Unsere Klassen</h3>
         </a>
 
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Team.html" class="card color-green bg-team farbecht no-overlay">
             <h3>Unser Team</h3>
         </a>
        
-       <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Projekte.html" class="card color-yellow no-overlay">
             <h3>Unsere Projekte</h3>
         </a> 
 
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Erziehungsvereinbarung.html" class="card color-green bg-logo farbecht no-overlay">
             <h3>Erziehungs-<br>vereinbarung</h3>
         </a>
         
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Foerderverein.html" class="card color-yellow bg-foerderverein farbecht no-overlay">
             <h3>Unser Förderverein</h3>
         </a>
 
-        <!-- GEÄNDERT: Überschrift jetzt mittig linksausgerichtet und größer -->
         <a href="Ganztag.html" class="card color-green farbecht no-overlay">
             <h3>Offener Ganztag</h3>
         </a>
